@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Une surprise rien que pour toi 🎁</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:"Comic Sans MS","Comic Sans","Chalkboard SE","Comic Neue",cursive;user-select:none;-webkit-user-select:none}
+  .screen{position:fixed;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;text-align:center}
+  .screen.on{display:flex}
+
+  /* --- Écran d'accueil --- */
+  #start{background:radial-gradient(circle,#ff9ad5,#7a2cff);color:#fff}
+  #start h1{font-size:clamp(28px,6vw,64px);text-shadow:3px 3px 0 #ff00aa,6px 6px 0 #00e1ff;margin-bottom:30px;padding:0 20px}
+  #go{font-family:inherit;font-size:clamp(22px,4vw,36px);padding:18px 40px;border-radius:60px;border:5px dashed #ffef00;background:#ff2fa6;color:#fff;cursor:pointer;animation:pulse 0.8s infinite alternate;box-shadow:0 0 30px #fff}
+  @keyframes pulse{to{transform:scale(1.12) rotate(-3deg)}}
+
+  /* --- Effets nuls --- */
+  #lame{animation:bgcycle 0.6s infinite;overflow:hidden}
+  @keyframes bgcycle{0%{background:#ff00cc}20%{background:#00ffea}40%{background:#ffee00}60%{background:#44ff00}80%{background:#ff6a00}100%{background:#ff00cc}}
+  #title{font-size:clamp(30px,7vw,90px);font-weight:bold;padding:0 20px;background:linear-gradient(90deg,red,orange,yellow,lime,cyan,blue,magenta,red);background-size:400% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-stroke:2px #000;animation:rainbow 1s linear infinite,wobble 0.5s ease-in-out infinite alternate;z-index:5}
+  @keyframes rainbow{to{background-position:400% 0}}
+  @keyframes wobble{from{transform:rotate(-6deg) scale(1)}to{transform:rotate(6deg) scale(1.15)}}
+  #sub{margin-top:20px;font-size:clamp(18px,3.5vw,34px);color:#000;background:#fff;padding:6px 16px;border:4px ridge #f0f;animation:blink .4s steps(2) infinite;z-index:5}
+  @keyframes blink{50%{opacity:.2}}
+  #barwrap{margin-top:35px;width:min(80vw,600px);height:38px;border:4px outset #ccc;background:#fff;z-index:5;position:relative}
+  #bar{height:100%;width:0;background:repeating-linear-gradient(45deg,#00c853 0 15px,#b2ff59 15px 30px)}
+  #pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:bold;color:#000}
+  #loadtxt{margin-top:10px;font-size:clamp(14px,2.5vw,22px);color:#000;z-index:5;background:#ffffffaa;padding:4px 10px}
+  .faller{position:absolute;top:-60px;font-size:40px;pointer-events:none;animation:fall linear forwards;z-index:2}
+  @keyframes fall{to{transform:translateY(115vh) rotate(720deg)}}
+  .spark{position:fixed;pointer-events:none;font-size:22px;z-index:9;animation:sparkfade .8s forwards}
+  @keyframes sparkfade{to{opacity:0;transform:translateY(-40px) scale(.3)}}
+  .wordart{position:absolute;font-size:clamp(22px,4vw,46px);font-weight:bold;color:#ff0;-webkit-text-stroke:2px #f00;text-shadow:4px 4px 0 #00f;animation:spin 1.5s linear infinite;z-index:3}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* --- Noir --- */
+  #black{background:#000}
+
+  /* --- Serpents --- */
+  #snakes{background:#000}
+  #cv{position:absolute;inset:0;width:100%;height:100%}
+  #flash{position:absolute;inset:0;background:#f00;opacity:0;pointer-events:none}
+  .shake{animation:shake .08s infinite}
+  @keyframes shake{0%{transform:translate(8px,-6px)}25%{transform:translate(-10px,7px)}50%{transform:translate(6px,10px)}75%{transform:translate(-7px,-9px)}100%{transform:translate(9px,4px)}}
+
+  /* --- Fin --- */
+  #end{background:radial-gradient(circle,#2bff88,#007a3d);color:#fff}
+  #end h1{font-size:clamp(36px,9vw,110px);text-shadow:4px 4px 0 #000;animation:wobble .6s infinite alternate;padding:0 20px}
+  #end p{font-size:clamp(18px,3.5vw,32px);margin-top:20px;text-shadow:2px 2px 0 #000}
+  #replay{margin-top:35px;font-family:inherit;font-size:22px;padding:12px 30px;border-radius:40px;border:4px solid #fff;background:#000;color:#fff;cursor:pointer}
+</style>
+</head>
+<body>
+
+<div id="start" class="screen on">
+  <h1 id="hello">Salut ! J'ai préparé un truc rien que pour toi 💖</h1>
+  <button id="go">🎁 Ouvrir ma surprise 🎁</button>
+</div>
+
+<div id="lame" class="screen">
+  <div id="title">✨ SURPRISE ✨</div>
+  <div id="sub">🔥 EFFETS SPÉCIAUX ULTRA HD 4K 🔥</div>
+  <div id="barwrap"><div id="bar"></div><div id="pct">0%</div></div>
+  <div id="loadtxt">Chargement de ta surprise trop stylée...</div>
+</div>
+
+<div id="black" class="screen"></div>
+
+<div id="snakes" class="screen">
+  <canvas id="cv"></canvas>
+  <div id="flash"></div>
+</div>
+
+<div id="end" class="screen">
+  <h1 id="gotcha">😂 JE T'AI EU ! 😂</h1>
+  <p>T'as eu peur, avoue 🐍</p>
+  <button id="replay">↻ Revoir (si t'oses)</button>
+</div>
+
+<script>
+// ---------- Prénom optionnel : ajoute #Lucas à la fin du lien ----------
+let nom = "";
+try { nom = decodeURIComponent(location.hash.replace("#","")).replace(/[-_]/g," ").trim().slice(0,30); } catch(e){}
+if (nom) {
+  document.getElementById("hello").textContent = "Salut " + nom + " ! J'ai préparé un truc rien que pour toi 💖";
+  document.getElementById("title").textContent = "✨ SURPRISE POUR " + nom.toUpperCase() + " ✨";
+  document.getElementById("gotcha").textContent = "😂 JE T'AI EU " + nom.toUpperCase() + " ! 😂";
+}
+
+const $ = id => document.getElementById(id);
+function show(id){ document.querySelectorAll(".screen").forEach(s=>s.classList.remove("on")); $(id).classList.add("on"); }
+
+// ---------- Audio (généré, aucun fichier) ----------
+let ac = null, master = null;
+function initAudio(){
+  try {
+    ac = new (window.AudioContext || window.webkitAudioContext)();
+    master = ac.createGain(); master.gain.value = 0.9; master.connect(ac.destination);
+    if (ac.state === "suspended") ac.resume();
+  } catch(e){ ac = null; }
+}
+function beep(freq, t0, dur, type="square", vol=0.08){
+  if(!ac) return;
+  const o = ac.createOscillator(), g = ac.createGain();
+  o.type = type; o.frequency.value = freq;
+  g.gain.setValueAtTime(vol, t0); g.gain.exponentialRampToValueAtTime(0.0001, t0+dur);
+  o.connect(g); g.connect(master); o.start(t0); o.stop(t0+dur+0.02);
+}
+let lameMusicTimer = null;
+function lameMusic(){
+  if(!ac) return;
+  const notes = [523,659,784,1047,784,659,523,392, 440,554,659,880,659,554,440,330];
+  let i = 0;
+  lameMusicTimer = setInterval(()=>{ beep(notes[i%notes.length], ac.currentTime, 0.12); if(i%4===0) beep(130, ac.currentTime, 0.1, "triangle", 0.12); i++; }, 140);
+}
+function stopLameMusic(){ clearInterval(lameMusicTimer); }
+
+function noiseBuffer(sec){
+  const b = ac.createBuffer(1, ac.sampleRate*sec, ac.sampleRate), d = b.getChannelData(0);
+  for(let i=0;i<d.length;i++) d[i] = Math.random()*2-1;
+  return b;
+}
+function hiss(dur=6){
+  if(!ac) return;
+  const src = ac.createBufferSource(); src.buffer = noiseBuffer(dur);
+  const f = ac.createBiquadFilter(); f.type = "bandpass"; f.frequency.value = 5500; f.Q.value = 0.8;
+  const g = ac.createGain(), t = ac.currentTime;
+  g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.5, t+0.05);
+  // pulsations de sifflement
+  for(let k=0;k<dur*3;k++){ g.gain.setValueAtTime(0.55, t+k/3); g.gain.linearRampToValueAtTime(0.18, t+k/3+0.25); }
+  g.gain.linearRampToValueAtTime(0, t+dur);
+  src.connect(f); f.connect(g); g.connect(master); src.start(t);
+}
+function distCurve(k=60){ const n=1024,c=new Float32Array(n); for(let i=0;i<n;i++){const x=i*2/n-1; c[i]=(1+k)*x/(1+k*Math.abs(x));} return c; }
+function scream(){
+  if(!ac) return;
+  const t = ac.currentTime, ws = ac.createWaveShaper(); ws.curve = distCurve(80);
+  const g = ac.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.35,t+0.03); g.gain.setValueAtTime(0.35,t+1.6); g.gain.exponentialRampToValueAtTime(0.0001,t+2.6);
+  ws.connect(g); g.connect(master);
+  [0,7,13].forEach(det=>{
+    const o = ac.createOscillator(); o.type = "sawtooth";
+    o.frequency.setValueAtTime(700+det*10, t); o.frequency.exponentialRampToValueAtTime(1500+det*15, t+0.4); o.frequency.exponentialRampToValueAtTime(900, t+2.5);
+    const lfo = ac.createOscillator(), lg = ac.createGain(); lfo.frequency.value = 9+det/3; lg.gain.value = 60;
+    lfo.connect(lg); lg.connect(o.frequency); lfo.start(t); lfo.stop(t+2.7);
+    o.connect(ws); o.start(t); o.stop(t+2.7);
+  });
+}
+function boom(){
+  if(!ac) return;
+  const t = ac.currentTime, o = ac.createOscillator(), g = ac.createGain();
+  o.type = "sine"; o.frequency.setValueAtTime(140,t); o.frequency.exponentialRampToValueAtTime(35,t+0.8);
+  g.gain.setValueAtTime(0.9,t); g.gain.exponentialRampToValueAtTime(0.001,t+1);
+  o.connect(g); g.connect(master); o.start(t); o.stop(t+1.05);
+  const n = ac.createBufferSource(); n.buffer = noiseBuffer(0.5);
+  const ng = ac.createGain(); ng.gain.setValueAtTime(0.6,t); ng.gain.exponentialRampToValueAtTime(0.001,t+0.5);
+  n.connect(ng); ng.connect(master); n.start(t);
+}
+
+// ---------- Étape 1 : effets spéciaux nuls ----------
+const emojis = ["⭐","🌈","🦄","🎉","💖","🍕","✨","🐬","🎈","😎"];
+const words = ["WOW","TROP BIEN","STYLÉ","INCROYABLE","OMG","SUPER"];
+let fallTimer, wordTimer, sparkOn = false;
+
+function spawnFaller(){
+  const e = document.createElement("div"); e.className = "faller";
+  e.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+  e.style.left = Math.random()*100 + "vw";
+  e.style.fontSize = (25+Math.random()*40) + "px";
+  e.style.animationDuration = (1.5+Math.random()*2) + "s";
+  $("lame").appendChild(e); setTimeout(()=>e.remove(), 4000);
+}
+function spawnWord(){
+  const w = document.createElement("div"); w.className = "wordart";
+  w.textContent = words[Math.floor(Math.random()*words.length)] + " !!!";
+  w.style.left = (5+Math.random()*70) + "vw"; w.style.top = (5+Math.random()*80) + "vh";
+  $("lame").appendChild(w); setTimeout(()=>w.remove(), 1600);
+}
+function sparkle(x,y){
+  if(!sparkOn) return;
+  const s = document.createElement("div"); s.className = "spark"; s.textContent = "✨";
+  s.style.left = x+"px"; s.style.top = y+"px"; document.body.appendChild(s); setTimeout(()=>s.remove(), 800);
+}
+addEventListener("mousemove", e=>sparkle(e.clientX,e.clientY));
+addEventListener("touchmove", e=>{ const t=e.touches[0]; sparkle(t.clientX,t.clientY); }, {passive:true});
+
+const loadMsgs = ["Chargement de ta surprise trop stylée...","Ajout des paillettes...","Calibrage des licornes...","Téléchargement de la magie...","Presque fini...","Encore un tout petit peu..."];
+
+function stageLame(){
+  show("lame"); sparkOn = true; lameMusic();
+  fallTimer = setInterval(spawnFaller, 120);
+  wordTimer = setInterval(spawnWord, 700);
+  let p = 0, msgI = 0;
+  const step = setInterval(()=>{
+    p += Math.random()*6 + 2;
+    if (p >= 99) {
+      p = 99; clearInterval(step);
+      $("loadtxt").textContent = "Finalisation...";
+      // on bloque à 99% pour faire monter la tension
+      setTimeout(stageBlack, 1800);
+    }
+    $("bar").style.width = p + "%"; $("pct").textContent = Math.floor(p) + "%";
+    if (Math.random() < 0.15) { msgI = (msgI+1) % loadMsgs.length; $("loadtxt").textContent = loadMsgs[msgI]; }
+  }, 220);
+}
+
+// ---------- Étape 2 : noir total ----------
+function stageBlack(){
+  stopLameMusic(); clearInterval(fallTimer); clearInterval(wordTimer); sparkOn = false;
+  document.querySelectorAll(".faller,.wordart").forEach(e=>e.remove());
+  show("black");
+  setTimeout(stageSnakes, 900);
+}
+
+// ---------- Étape 3 : SERPENTS ----------
+const cv = $("cv"), ctx = cv.getContext("2d");
+let W, H, DPR;
+function resize(){ DPR = Math.min(window.devicePixelRatio||1, 2); W = innerWidth; H = innerHeight; cv.width = W*DPR; cv.height = H*DPR; ctx.setTransform(DPR,0,0,DPR,0,0); }
+addEventListener("resize", resize);
+
+const palettes = [["#1b5e20","#9ccc65"],["#212121","#ffeb3b"],["#3e2723","#a1887f"],["#0d3b0d","#76ff03"],["#111","#e53935"],["#263238","#80cbc4"]];
+let snakes = [], running = false, tStart = 0, lunge = null;
+
+function makeSnake(){
+  const side = Math.floor(Math.random()*4), m = 80;
+  let x, y;
+  if (side===0){ x=-m; y=Math.random()*H; } else if (side===1){ x=W+m; y=Math.random()*H; }
+  else if (side===2){ x=Math.random()*W; y=-m; } else { x=Math.random()*W; y=H+m; }
+  const tx = W*(0.2+Math.random()*0.6), ty = H*(0.2+Math.random()*0.6);
+  const scale = 0.6 + Math.random()*1.4;
+  return {
+    x, y, a: Math.atan2(ty-y, tx-x), tx, ty,
+    speed: (2.5+Math.random()*3)*scale,
+    w: 14*scale, len: Math.floor(70+Math.random()*90),
+    hist: [], phase: Math.random()*10, freq: 0.08+Math.random()*0.06,
+    pal: palettes[Math.floor(Math.random()*palettes.length)],
+    tongue: Math.random()*10
+  };
+}
+
+function updateSnake(s, f){
+  // ondulation + attirance vers une cible qui bouge
+  const desired = Math.atan2(s.ty - s.y, s.tx - s.x);
+  let diff = desired - s.a; diff = Math.atan2(Math.sin(diff), Math.cos(diff));
+  s.a += diff*0.03 + Math.sin(f*s.freq + s.phase)*0.09;
+  s.x += Math.cos(s.a)*s.speed; s.y += Math.sin(s.a)*s.speed;
+  if (Math.hypot(s.tx-s.x, s.ty-s.y) < 60){ s.tx = Math.random()*W; s.ty = Math.random()*H; }
+  s.hist.unshift({x:s.x, y:s.y});
+  if (s.hist.length > s.len) s.hist.pop();
+  s.tongue += 0.3;
+}
+
+function drawSnake(s){
+  const h = s.hist, n = h.length; if (n < 3) return;
+  // corps
+  for (let i = n-1; i >= 0; i -= 2){
+    const k = i/n, r = s.w*(1 - k*0.85);
+    ctx.beginPath(); ctx.arc(h[i].x, h[i].y, r, 0, Math.PI*2);
+    ctx.fillStyle = (Math.floor(i/8)%2) ? s.pal[0] : s.pal[1];
+    ctx.fill();
+  }
+  // tête
+  const hx = h[0].x, hy = h[0].y, a = s.a, w = s.w;
+  ctx.save(); ctx.translate(hx, hy); ctx.rotate(a);
+  // langue
+  if (Math.sin(s.tongue) > 0){
+    ctx.strokeStyle = "#ff1744"; ctx.lineWidth = Math.max(1.5, w*0.12);
+    const tl = w*1.6;
+    ctx.beginPath(); ctx.moveTo(w*1.1,0); ctx.lineTo(w*1.1+tl,0);
+    ctx.lineTo(w*1.1+tl+w*0.4,-w*0.3); ctx.moveTo(w*1.1+tl,0); ctx.lineTo(w*1.1+tl+w*0.4,w*0.3); ctx.stroke();
+  }
+  ctx.beginPath(); ctx.ellipse(w*0.3, 0, w*1.35, w*1.05, 0, 0, Math.PI*2);
+  ctx.fillStyle = s.pal[0]; ctx.fill();
+  // yeux
+  [-1,1].forEach(sd=>{
+    ctx.beginPath(); ctx.ellipse(w*0.6, sd*w*0.5, w*0.32, w*0.26, 0, 0, Math.PI*2);
+    ctx.fillStyle = "#ffea00"; ctx.fill();
+    ctx.beginPath(); ctx.ellipse(w*0.65, sd*w*0.5, w*0.07, w*0.22, 0, 0, Math.PI*2);
+    ctx.fillStyle = "#000"; ctx.fill();
+  });
+  ctx.restore();
+}
+
+function drawLunge(now){
+  if (!lunge) return;
+  const t = (now - lunge.t0) / 700; // 0 → 1
+  if (t > 1.3){ lunge = null; return; }
+  const sc = Math.min(1, t) ** 2 * Math.max(W,H) / 160;
+  ctx.save(); ctx.translate(W/2, H/2); ctx.scale(sc, sc);
+  // tête géante gueule ouverte
+  ctx.fillStyle = "#1b3d1b";
+  ctx.beginPath(); ctx.ellipse(0,0,95,80,0,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle = "#4a0000";
+  ctx.beginPath(); ctx.ellipse(0,18,62,48,0,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle = "#b71c1c";
+  ctx.beginPath(); ctx.ellipse(0,38,30,14,0,0,Math.PI*2); ctx.fill();
+  // crocs
+  ctx.fillStyle = "#fff";
+  [[-30,-28],[30,-28]].forEach(([x,y])=>{ ctx.beginPath(); ctx.moveTo(x-9,y); ctx.lineTo(x+9,y); ctx.lineTo(x,y+38); ctx.closePath(); ctx.fill(); });
+  // yeux
+  [-1,1].forEach(sd=>{
+    ctx.fillStyle = "#ffea00"; ctx.beginPath(); ctx.ellipse(sd*52,-45,20,15,0,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle = "#000"; ctx.beginPath(); ctx.ellipse(sd*52,-45,4,13,0,0,Math.PI*2); ctx.fill();
+  });
+  ctx.restore();
+}
+
+let frame = 0;
+function loop(now){
+  if (!running) return;
+  frame++;
+  const el = now - tStart;
+  ctx.fillStyle = "rgba(0,0,0,0.35)"; ctx.fillRect(0,0,W,H);
+  // de plus en plus de serpents
+  const target = Math.min(70, 8 + Math.floor(el/60));
+  while (snakes.length < target) snakes.push(makeSnake());
+  snakes.forEach(s=>{ updateSnake(s, frame); drawSnake(s); });
+  drawLunge(now);
+  if (el > 6500){ stageEnd(); return; }
+  requestAnimationFrame(loop);
+}
+
+function flash(times){
+  const f = $("flash"); let i = 0;
+  const iv = setInterval(()=>{ f.style.opacity = (i%2===0) ? 0.55 : 0; if(++i >= times*2){ clearInterval(iv); f.style.opacity = 0; } }, 70);
+}
+
+function stageSnakes(){
+  show("snakes"); resize();
+  ctx.fillStyle = "#000"; ctx.fillRect(0,0,W,H);
+  snakes = []; for (let i=0;i<14;i++) snakes.push(makeSnake());
+  running = true; tStart = performance.now(); frame = 0;
+  $("snakes").classList.add("shake");
+  boom(); scream(); hiss(6.5); flash(4);
+  try { navigator.vibrate && navigator.vibrate([300,100,300,100,600]); } catch(e){}
+  // tête géante qui fonce sur l'écran
+  setTimeout(()=>{ lunge = {t0: performance.now()}; boom(); scream(); flash(3); }, 2600);
+  requestAnimationFrame(loop);
+}
+
+// ---------- Étape 4 : fin ----------
+function stageEnd(){
+  running = false; $("snakes").classList.remove("shake");
+  show("end");
+  try { document.fullscreenElement && document.exitFullscreen(); } catch(e){}
+}
+
+// ---------- Lancement ----------
+$("go").addEventListener("click", ()=>{
+  initAudio();
+  try { const d = document.documentElement; (d.requestFullscreen || d.webkitRequestFullscreen).call(d).catch(()=>{}); } catch(e){}
+  stageLame();
+});
+$("replay").addEventListener("click", ()=>{
+  if (!ac) initAudio(); else if (ac.state === "suspended") ac.resume();
+  $("bar").style.width = "0"; $("pct").textContent = "0%";
+  try { const d = document.documentElement; (d.requestFullscreen || d.webkitRequestFullscreen).call(d).catch(()=>{}); } catch(e){}
+  stageLame();
+});
+</script>
+</body>
+</html>
